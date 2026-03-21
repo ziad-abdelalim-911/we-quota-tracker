@@ -1,10 +1,7 @@
 import json
 import sys
-import tkinter as tk
 from datetime import datetime, timedelta, timezone
-from tkinter import messagebox
 import os
-import pandas as pd
 import requests
 from dotenv import load_dotenv
 import re
@@ -103,9 +100,6 @@ def write_to_db(now_datetime, currentDay, remainGB, overAllState, overAllStateGb
 lnd_number = os.getenv("LND_NUMBER")
 lnd_pass = os.getenv("LND_PASS")
 
-# Create the main window for the application to ensure that the messagebox has a parent (this is a requirement for some systems).
-root = tk.Tk()
-root.withdraw()  # This hides the main window which we don't want to show
 acctId = "FBB" + lnd_number[1:]  # The account ID is the same as the landline number but with "FBB" at the beginning
 
 def tsConv(unix_timestamp, returnUntil=False):
@@ -144,8 +138,7 @@ def check_internet_connection():
         if response.status_code == 200:
             print("Internet connection is available.")
     except requests.RequestException as e:
-        error_msg = f"Error: {e}\nNo internet connection available. Exiting..."
-        messagebox.showerror("Internet Connection Error", error_msg)
+        logging.error(f"Internet Connection Error: {e} — No internet connection available. Exiting...")
         sys.exit(1)
 
 check_internet_connection()
@@ -341,38 +334,26 @@ with requests.Session() as session:
                 if db_success:
                 
                     message = (
-                        "Record added successfully!\n\n"
+                        "Record added successfully!\n"
 
-                        f"Day{currentDay} Usage: {dailyUsage:.1f} GBs \n\n"
+                        f"Day{currentDay} Usage: {dailyUsage:.1f} GBs \n"
 
                         f"Remaining Days: {remainingDays}\n"
                         f"{remainGB} / {totalGB} GBs Remaining ({usagePrc:.1f}% Used)\n"
                         f"Overall State: {overAllState} ({overAllStateGbs:.1f} GBs => {stateDays:.1f} Days)\n"
                     )
 
-                    messagebox.showinfo(title=name, message=message)
+                    print(message)
                     
                 else:
-                    messagebox.showerror(
-                        title="Error",
-                        message="Couldn't add record to database. Please check your DB connection and try again."
-                    )
+                    logging.error("Couldn't add record to database. Please check your DB connection and try again.")
 
             else:
-                messagebox.showerror(
-                    title="Error",
-                    message="Couldn't add record - failed to retrieve quota details."
-                )
-                print(json.dumps(quota_details_data))
+                logging.error("Couldn't add record - failed to retrieve quota details.")
+                logging.debug(json.dumps(quota_details_data))
         else:
-            messagebox.showerror(
-                title="Error", 
-                message="Couldn't add record - failed to get subscription offerings."
-            )
-            print(json.dumps(get_offers_data))
+            logging.error("Couldn't add record - failed to get subscription offerings.")
+            logging.debug(json.dumps(get_offers_data))
     else:
-        messagebox.showerror(
-            title="Authentication Error",
-            message="Couldn't add record - authentication failed. Please check your credentials."
-        )
-        print(json.dumps(auth_data))
+        logging.error("Authentication Error: Couldn't add record - authentication failed. Please check your credentials.")
+        logging.debug(json.dumps(auth_data))
