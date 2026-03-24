@@ -31,7 +31,7 @@ def get_db_connection():
         return conn
 
     except Exception as e:
-        logging.error(f"Connection failed: {e}")
+        logging.error("Database connection failed. Please check your network and DB credentials in .env")
         return None
 
 def ensure_table_exists(cursor):
@@ -93,7 +93,7 @@ def write_to_db(now_datetime, currentDay, remainGB, overAllState, overAllStateGb
         return True, usage
     
     except Exception as e:
-        print(f"Error writing to database: {e}")
+        logging.error("Failed to write quota record to database.")
         return False, 0 
 
 # Your credentials
@@ -138,7 +138,7 @@ def check_internet_connection():
         if response.status_code == 200:
             print("Internet connection is available.")
     except requests.RequestException as e:
-        logging.error(f"Internet Connection Error: {e} — No internet connection available. Exiting...")
+        logging.error("Internet Connection Error — No internet connection available. Exiting...")
         sys.exit(1)
 
 check_internet_connection()
@@ -350,10 +350,7 @@ with requests.Session() as session:
 
             else:
                 logging.error("Couldn't add record - failed to retrieve quota details.")
-                logging.debug(json.dumps(quota_details_data))
         else:
             logging.error("Couldn't add record - failed to get subscription offerings.")
-            logging.debug(json.dumps(get_offers_data))
     else:
         logging.error("Authentication Error: Couldn't add record - authentication failed. Please check your credentials.")
-        logging.debug(json.dumps(auth_data))
