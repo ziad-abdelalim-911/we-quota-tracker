@@ -2,7 +2,7 @@ name: Daily Quota Tracker
 
 on:
   schedule:
-    - cron: '50 20 * * *'   # 10:50 PM Egypt time (UTC+2) = 20:50 UTC
+    - cron: '0 19 * * *'    # Runs every day at 9 PM Egypt time (may be 10 PM in summer)
   workflow_dispatch:        # Allow manual runs
 
 jobs:
