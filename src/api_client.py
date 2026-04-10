@@ -114,9 +114,9 @@ def get_quota(session: requests.Session, token: str, subscriber_id: str, offer_i
     return quota
 
 
-def fetch_quota_data(session: requests.Session):
+def fetch_quota_data():
     """
-    Orchestrates the full TE API flow inside the given session:
+    Orchestrates the full TE API flow:
       1. Seed cookies
       2. Authenticate
       3. Get offers
@@ -124,18 +124,19 @@ def fetch_quota_data(session: requests.Session):
 
     Returns (auth_info, quota_body) on success, or (None, error_msg) on failure.
     """
-    init_session(session)
+    with requests.Session() as session:
+        init_session(session)
 
-    auth = authenticate(session)
-    if auth is None:
-        return None, "Authentication failed. Please check your credentials."
+        auth = authenticate(session)
+        if auth is None:
+            return None, "Authentication failed. Please check your credentials."
 
-    offer_id = get_offers(session, auth["token"])
-    if offer_id is None:
-        return None, "Failed to get subscription offerings."
+        offer_id = get_offers(session, auth["token"])
+        if offer_id is None:
+            return None, "Failed to get subscription offerings."
 
-    quota = get_quota(session, auth["token"], auth["subscriberId"], offer_id)
-    if quota is None:
-        return None, "Failed to retrieve quota details."
+        quota = get_quota(session, auth["token"], auth["subscriberId"], offer_id)
+        if quota is None:
+            return None, "Failed to retrieve quota details."
 
-    return auth, quota
+        return auth, quota

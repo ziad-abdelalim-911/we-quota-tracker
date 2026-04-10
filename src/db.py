@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import psycopg2
 import psycopg2.extras
@@ -33,7 +34,8 @@ def ensure_table_exists(cursor):
     """)
 
 
-def insert_record(now_datetime, currentDay, remainGB, overAllState, overAllStateGbs, stateDays, remainingDays):
+def insert_record(currentDay, remainGB, overAllState, overAllStateGbs, stateDays, remainingDays):
+    now_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
